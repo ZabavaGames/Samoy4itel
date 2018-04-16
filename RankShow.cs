@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 namespace MyMobileProject1 {
 
@@ -9,13 +10,13 @@ public class RankShow : MonoBehaviour {
 
 	public StartupManager SM;
 
-	public Button Light, Medium, Hard, Advanced;
+	public Button Light, Medium, Hard, Advanced, Back;
 	public Image SayCloud2;
 
-	private static string Helpach0 = "Выберите уровень сложности. Начните с легкого!";
-	private static string Helpach1 = "Вы открыли более сложный уровень. Попробуйте сыграть на нем!";
-	private static string Helpach2 = "Получите еще несколько звезд, чтобы открыть самый сложный уровень!";
-	private static string Helpach3 = "Выберите уровень сложности. Какой вам нравится?";
+	private static string Helpach0 = "Выбери уровень сложности. Начни с легкого!";
+	private static string Helpach1 = "Ты открыл более сложный уровень. Попробуй сыграть на нём!";
+	private static string Helpach2 = "Получи еще несколько звёзд, чтобы открыть самый сложный уровень!";
+	private static string Helpach3 = "Выбери уровень сложности. Какой тебе нравится?";
 
 	// Use this for initialization
 	void Start () {
@@ -25,20 +26,22 @@ public class RankShow : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		if (SM.EscapeSupported)  // ловим аппаратную кнопку
+			if (Input.GetKeyDown (KeyCode.Escape)) 
+				Back.onClick.Invoke ();	
 	}
 
 	void Awake () {
 		bool[] matrix;
-		if (SM.Grade < (int)grades.shkolnik) {
+		if (SM.Grade < GradesConst.RankGradeReq[(int)ranks.light]) {
 			matrix = new bool[] {false, true, true, true};
 			StartCoroutine (SayHello (Helpach0));
 			}
-		else if (SM.Grade < (int)grades.gramotei) {
+		else if (SM.Grade < GradesConst.RankGradeReq[(int)ranks.medium]) {
 			matrix = new bool[] {false, false, true, true};
 			StartCoroutine (SayHello (Helpach1));
 			}
-		else if (SM.Grade < (int)grades.otlichnik) {
+		else if (SM.Grade < GradesConst.RankGradeReq[(int)ranks.advanced]) {
 			matrix = new bool[] {false, false, false, true};
 			StartCoroutine (SayHello (Helpach2));
 			}

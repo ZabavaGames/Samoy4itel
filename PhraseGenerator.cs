@@ -14,8 +14,8 @@ namespace MyMobileProject1 {
 	public class PhraseGenerator {
 
 		private string[] Phrases;
-		private static string[] SourceFiles = new string[] {"source/dal1000-1.txt", "source/dal1000-2.txt",
-			"source/sysoev.txt", "source/Берсеньева-1.txt", "source/Берсеньева-2.txt"};
+		private static string[] SourceFiles = new string[] //{"dal1000-1.txt", "dal1000-2.txt",
+			{"Берсеньева-1.txt"};//, "Берсеньева-2.txt", "sysoev.txt"};
 		private static int SourceLength, SourceIndex;
 
 		private static char[] Signs = { '.', '!', '?' };
@@ -27,22 +27,22 @@ namespace MyMobileProject1 {
 								'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я' };
 
 		private static char[][] CharTable_closest, RusCharTable_closest = new char[][] {
-			new char[] {'к', 'е', 'в', 'п', 'с', 'м'}, new char[] {'л', 'д', 'ь', 'ю', ' '}, 
+			new char[] {'к', 'е', 'в', 'п', 'с', 'м'}, new char[] {'л', 'д', 'ь', 'ю', '_'}, 
 			new char[] {'у', 'к', 'ы', 'а', 'ч', 'с'}, new char[] {'7', '8', 'н', 'ш', 'р', 'о'},
    			new char[] {'щ', 'з', 'л', 'ж', 'б', 'ю'}, new char[] {'5', '6', 'к', 'н', 'а', 'п'},
-			new char[] {'1', 'е', 'ё'}, new char[] {'з', 'х', 'д', 'э', 'ю', '.'}, 
-			new char[] {'0', '-', 'щ', 'х', 'д', 'ж'}, new char[] {'п', 'р', 'м', 'т', ' '}, 
+			new char[] {'1', 'е', 'ё'}, new char[] {'з', 'х', 'д', 'э', 'ю', '_'}, 
+			new char[] {'0', '-', 'щ', 'х', 'д', 'ж'}, new char[] {'п', 'р', 'м', 'т', '_'}, 
 			new char[] {'1', '2', 'ц', 'ф'}, new char[] {'4', '5', 'у', 'е', 'в', 'а'},
-			new char[] {'ш', 'щ', 'о', 'д', 'ь', 'б'}, new char[] {'а', 'п', 'с', 'и', ' '}, 
+			new char[] {'ш', 'щ', 'о', 'д', 'ь', 'б'}, new char[] {'а', 'п', 'с', 'и', '_'}, 
 			new char[] {'6', '7', 'е', 'г', 'п', 'р'}, new char[] {'г', 'ш', 'р', 'л', 'т', 'ь'},
 			new char[] {'е', 'н', 'а', 'р', 'м', 'и'}, new char[] {'н', 'г', 'п', 'о', 'и', 'т'},
-			new char[] {'в', 'а', 'ч', 'м', ' '}, new char[] {'р', 'о', 'и', 'ь', ' '}, 
+			new char[] {'в', 'а', 'ч', 'м', '_'}, new char[] {'р', 'о', 'и', 'ь', '_'}, 
 			new char[] {'3', '4', 'ц', 'к', 'ы', 'в'}, new char[] {'й', 'ц', 'ы', 'я'}, 
 			new char[] {'-', '=', 'з', 'ъ', 'ж', 'э'}, new char[] {'2', '3', 'й', 'у', 'ф', 'ы'},
-			new char[] {'ы', 'в', 'я', 'с', '\\', ' '}, new char[] {'8', '9', 'г', 'щ', 'о', 'л'},
+			new char[] {'ы', 'в', 'я', 'с', '\\', '_'}, new char[] {'8', '9', 'г', 'щ', 'о', 'л'},
 			new char[] {'9', '0', 'ш', 'з', 'л', 'д'}, new char[] {'=', '\\', 'х', 'э', 'ь'}, 
-			new char[] {'ц', 'у', 'ф', 'в', 'я', 'ч'}, new char[] {'о', 'л', 'т', 'б', ' ', 'ъ'},
-			new char[] {'х', 'ъ', 'ж', '.'}, new char[] {'д', 'ж', 'б', '.'}, 
+			new char[] {'ц', 'у', 'ф', 'в', 'я', 'ч'}, new char[] {'о', 'л', 'т', 'б', '_', 'ъ'},
+			new char[] {'х', 'ъ', 'ж', '_'}, new char[] {'д', 'ж', 'б', '_'}, 
 			new char[] {'ф', 'ы', 'ч', '\\'}
 			};
 
@@ -59,8 +59,8 @@ namespace MyMobileProject1 {
 
 
 	// Use this for initialization
-	void Start () {
-		Phrases = LoadRandStrings (SourceFiles);  // если несколько файлов, то можно случайно выбирать один из них
+	void Start (string source) {
+		Phrases = LoadRandStrings (source, SourceFiles);  // если несколько файлов, то можно случайно выбирать один из них
 		SourceLength = Phrases.Length;
 		SourceIndex = 0;
 		CharTable = RusCharTable;  // для русской версии
@@ -70,12 +70,12 @@ namespace MyMobileProject1 {
 		CharTable_udarn_pairs = RusCharTable_udarn_pairs;
 	}
 	
-	public PhraseGenerator () {
-			Start ();
+	public PhraseGenerator (string source) {
+			Start (source);
 	}
 
-	private string[] LoadRandStrings (string[] filenames) {
-		string[] res = { SourceFiles[Random4ik (SourceFiles.Length)] }; 
+	private string[] LoadRandStrings (string source, string[] filenames) {
+		string[] res = { source + SourceFiles[Random4ik (SourceFiles.Length)] }; 
 Debug.Log ("Грузим " + res[0]);
 		return LoadLstrings (res);
 	}

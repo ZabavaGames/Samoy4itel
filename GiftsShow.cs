@@ -12,10 +12,10 @@ public class GiftsShow : MonoBehaviour {
 	public Button BuyADButton, BuyLvButton;
 	public Text BuyADText, BuyLvText;
 
-	private static string ADPurchased = "Вы уже купили пакет \"Премиум\". Спасибо за вашу поддержку!";
-	private static string ADnotPurchased = "Купите пакет \"Премиум\" для того, чтобы отключить рекламу в игре и получать все будущие обновления бесплатно!";
-	private static string AllLvPurchased = "Вы не можете купить максимальный уровень в игре! Но вы можете достичь его сами!";
-	private static string LvnotPurchased = "Вы можете мгновенно повысить свой уровень. Вы автоматически получите необходимое для этого количество звезд.";
+	private static string ADPurchased = "Ты уже купил пакет \"Премиум\". Спасибо за твою поддержку!";
+	private static string ADnotPurchased = "Купить пакет \"Премиум\" для того, чтобы отключить рекламу в игре и получать все будущие обновления бесплатно!";
+	private static string AllLvPurchased = "Ты не можешь купить максимальный уровень в игре! Но ты можешь достичь его сам!";
+	private static string LvnotPurchased = "Ты можешь мгновенно повысить свой уровень. Ты автоматически получишь необходимое для этого количество звёзд.";
 	private bool state;
 
 	// Use this for initialization

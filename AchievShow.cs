@@ -11,11 +11,11 @@ public class AchievShow : MonoBehaviour {
 	public StartupManager SM;
 	public Button ViewAds;
 
-	private static string Level = "Ваш уровень: ";
+	private static string Level = "Твой уровень: ";
 	private static string NextLevel = "Следующий уровень: ";
 	private static string Star_S = "Собрано звезд: ";
 	private static string Stars_L = "Осталось собрать звезд: ";
-	private static string AdsInfo = "Вы можете посмотреть рекламный ролик, чтобы получить звезду!";
+	private static string AdsInfo = "Ты можешь посмотреть рекламный ролик, чтобы получить звезду!";
 	private static string AdsText = "Смотреть видео";
 
 	// Use this for initialization

@@ -13,9 +13,10 @@ namespace MyMobileProject1 {
 
 	public class StartupManager : MonoBehaviour {
 
-	public bool FirstRun, SayHello;
+	public bool FirstRun, SayHello, SetScore;
 	public int TotalStars;
 	public int Grade;
+	public bool EscapeSupported;
 
 	public struct Purchase {
 		public bool DisableAds;
@@ -24,26 +25,35 @@ namespace MyMobileProject1 {
 
 	public GiftsShow SaleWindow;
 	public MainLevelShow MenuWindow;
+	public GameObject Otzenka;
 
 	private Action StartScene;
 
+	private const string PlayMarketUrl = "https://play.google.com/store/apps/details?id=com.ZabavaGames.Samoy4itel";
+	private const string PlayMarketLink = "market://details?id=com.ZabavaGames.Samoy4itel";
+//	private const string PlayMarketLink = "market://details?id=" + Application.productName;
 
 	// Use this for initialization
 	void Start () {	
-
-		FirstRun = true;	
 		TotalStars = 0;
    		Grade = GradesConst.MinGrade;
 		InAppItems.DisableAds = false; 
 
+		if (Application.platform == RuntimePlatform.Android || 
+			Application.platform == RuntimePlatform.WindowsPlayer ||
+			Application.platform == RuntimePlatform.WindowsEditor)
+			EscapeSupported = true;
+		else EscapeSupported = false;
+
 		// читаем настройки данные пользователя
 		// если первый запуск, то инициализируем их
+		FirstRun = true;	
 		if (!PlayerPrefs.HasKey (GradesConst.firstrun)) {
 			ResetPrefs ();
 			}
 		else {
-			string s = PlayerPrefs.GetString (GradesConst.firstrun);
-			if (string.Compare (s, GradesConst.done) == 0) 
+			string fs = PlayerPrefs.GetString (GradesConst.firstrun);
+			if (string.Compare (fs, GradesConst.done) == 0) 
 				FirstRun = false;	
 	    // выставить свой уровень и достижения
 			LoadPrefs ();
@@ -58,6 +68,13 @@ namespace MyMobileProject1 {
 			SayHello = true;
 		else SayHello = false;
 		PlayerPrefs.SetString (GradesConst.date, Today);
+
+		// проверяем, ставить ли оценку
+		string sc = PlayerPrefs.GetString (GradesConst.score);
+		if (String.Compare (sc, GradesConst.fivestars) != 0)
+			SetScore = true;
+		else
+			SetScore = false;
 	}
 
 	private void ResetPrefs () {
@@ -154,10 +171,19 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 
 	}
 
+
 	// Update is called once per frame
 	void Update () {
-		
+		if (EscapeSupported)
+			if (Input.GetKeyDown (KeyCode.Escape))  // ловим аппаратную кнопку
+			{
+			// сделать подтверждение выхода?..
+				if (MenuWindow.isActiveAndEnabled) {
+//						ExitGame ();
+					}
+			}
 	}
+
 
 	public void StartRusLesson (int flag) {
 		StartLesson (flag);
@@ -173,9 +199,12 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 	
 		StartScene = () => SceneManager.LoadScene (name);
 	// показать рекламу, если не отключена (при первом зап. не показывать
-		if (!InAppItems.DisableAds && !FirstRun)
-			ShowSkippableVideo ();
-		else
+//		if (!InAppItems.DisableAds && !FirstRun && Grade > GradesConst.MinGrade)
+//			ShowSkippableVideo ();
+//////////////////////////////
+//  РЕКЛАМУ ВРЕМЕННО УБРАЛ!!!!
+//////////////////////////////
+//		else
 			StartScene ();
 	}
 
@@ -195,7 +224,13 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 		options.resultCallback = HandleShowResults2;
 		Advertisement.Show("rewardedVideo", options);	
 	}
-	
+
+	private void ShowPromoScreen_OnExit () {
+		ShowOptions options = new ShowOptions ();
+		options.resultCallback = HandleShowResults3;
+		Advertisement.Show(options);	
+	}
+
 	private void HandleShowResults1 (ShowResult result) {
 		if (result == ShowResult.Finished) {
 			Debug.Log ("Video completed - offer reward");
@@ -231,16 +266,68 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 			StartScene ();
 	}
 
+	private void HandleShowResults3 (ShowResult result) {
+		ExitGame (false);
+	}
 
-	public void ExitGame () {
+	public void ExitGame (bool withPromo) {
 ////////////////////////////////
 // ResetPrefs ();  // в тестовых целях!!!
 //////////////////////////////////
-
-		ApplicationManager ap = GameObject.Find ("ApplicationManager").GetComponent<ApplicationManager>();
-		ap.Quit ();
+		SavePrefs ();
+		if (!FirstRun && SetScore && Grade > GradesConst.MinGrade + 1) {
+			ShowScoreWindow (true);
+			}
+		else {
+			ApplicationManager Ap = GameObject.Find ("ApplicationManager").GetComponent<ApplicationManager>();
+			if (withPromo)
+				ShowPromoScreen_OnExit ();
+			Ap.Quit ();
 		//	Application.Quit ();
+			}
 	}
+
+	public void ShowScoreWindow (bool state) {
+		if (state) {
+			// show 5 stars window
+			// убедиться, чтобы окно показывал только 1 раз
+			MenuWindow.gameObject.SetActive (false);
+			SetScore = false;
+			Otzenka.gameObject.SetActive (true);
+			}
+		else {
+			Otzenka.gameObject.SetActive (false);
+			MenuWindow.gameObject.SetActive (true);
+			}
+	}
+
+	// перейти в плеймаркет, чтобы поставить оценку
+	public void GoToMarket () {
+		PlayerPrefs.SetString (GradesConst.score, GradesConst.fivestars);
+	//	Application.OpenURL (PlayMarketUrl);
+		Application.OpenURL (PlayMarketLink);
+		ExitGame (false);
+	}
+
+	// отложить
+	public void NotNow () {
+		PlayerPrefs.SetString (GradesConst.score, GradesConst.undecised);
+		ExitGame (true);
+	}
+
+	// больше не поазывать
+	public void ForgetAboutIt () {
+		PlayerPrefs.SetString (GradesConst.score, GradesConst.fivestars);
+		ExitGame (true);
+	}
+
+	public void SendEmail ()
+ 	{
+  	string email = "zabava.games.studio@gmail.com";
+  	string subject = WWW.EscapeURL("About application Sam_sebe_uchitel").Replace("+","%20");
+  	Application.OpenURL("mailto:" + email + "?subject=" + subject);
+ 	}
+ 
 
 	public void ShowDebugInfo () {
 		GameObject o = GameObject.Find ("SystemText");
@@ -249,28 +336,28 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 //		string s = Application.buildGUID;
 		string ss = Application.productName;
 		string vcode = Application.version;
-		t.text = "\n" + "\nVersion: " + vcode + "\nBundle: 22" + "\nFirstRun: " + FirstRun;
+//		t.text = "\n" + "\nVersion: " + vcode + ".026" + "\nFirstRun: " + FirstRun;
 //			+ "\nstars = " + TotalStars + "\ngrade = " + Grade + "\nads disabled = " + InAppItems.DisableAds;
 	}
 
+	//  это была тестовая фигня
 	public void ShowPurchaseInfo (string info) {
-		GameObject o = GameObject.Find ("PurchaseText");
+/*		GameObject o = GameObject.Find ("PurchaseText");
 		if (info != null && o != null) {
 			Text t = o.GetComponent<Text>();
 			t.text += info + "\n";
 		}
-	}
+*/	}
 
 	public string GetGradeString () {
 		return GradesConst.GradeStringsRus[Grade];
 	}
 
 	public string GetNextGradeString () {
-//		if (Grade+1 < GradesConst.GradeStringsRus.Length)
 		if (Grade <= GradesConst.MaxGrade)
 			return GradesConst.GradeStringsRus[Grade+1];
 		else 
-			return "";
+			return String.Empty;
 	}
 
 	public int GetNextLevelStars () {

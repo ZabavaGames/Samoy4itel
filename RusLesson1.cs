@@ -23,7 +23,12 @@ public class RusLesson1 : MonoBehaviour {
 	private static char[] Ends = { '\0', '\n' };
 	private static char[] SpaceAndEnds = { ' ', '"', '\'', '.', '!', '?', '\0', '\n' };
 	private const string title = ", задание ";
-	private const string EndofPool = "Вы решили все примеры для этого уровня. Попробуйте более сложный!";
+	private const string EndofPool = "Ты решил все примеры этого уровня. Попробуй более сложный!";
+	private const string EndofPool1 = "Ты прошёл этот уровень. Можешь начать сначала!";
+	private const string EndofPool2 = "Или попробуй новый уровень сложности! Для этого начни новую игру. Твой прогресс сохранится.";
+	private const string EndofPool3 = "Постарайся исправить больше ошибок, чтобы открыть более сложный уровень.";
+	private const string HardHelp1 = "Ты выбрал сложный уровень. Он отличается от предыдущих.";
+	private const string HardHelp2 = "В этом режиме игры ты увидишь примеры из словаря русских пословиц и поговорок со случайными ошибками в них. Больше никаких повторов - количество примеров бесконечно!";
 	private static string[] Helpmsg0 = new string[] { 
 		"Безударная гласная!",
 		"Замени букву!",
@@ -50,6 +55,7 @@ public class RusLesson1 : MonoBehaviour {
 	private const string Level21Path = "2Уровень/1ошибка/";
 	private const string Level22Path = "2Уровень/2ошибки/";
 	private const string Level3Path = "3Уровень/";
+	private const string Level4Path = "4Уровень/";
 	private static string[] grade0files_show = new string[] {Level1Path + "0_Ош_Дошколёнок.txt"};  
 	private static string[] grade0files_corr = new string[] {Level1Path + "0_В_Дошколёнок.txt"};
 	private static string[] grade1files_show = new string[] {Level1Path + "1_Ош_001_зам15.txt", Level1Path + "1_Ош_002_пров15.txt", Level1Path + "1_Ош_003_согл15.txt", Level1Path + "1_Ош_004_слов15.txt", Level1Path + "1_Ош_005_лиш15.txt", Level1Path + "1_Ош_006_прав15.txt"}; 
@@ -67,7 +73,7 @@ public class RusLesson1 : MonoBehaviour {
 	private int SessionScore, ErrorsCorrected, SessionPhraseNumber, SessionLimit, LessonRank, 
 				SavedPosition, StartSavedPosition, TheGapInFile, TimeBestSec, TimeCapMsec;
 	private double SessionTime;
-	private bool LessonStarted, SessionStarted, FirstRun, PromotionFlag;
+	private bool LessonStarted, SessionStarted, FirstRun, PromotionFlag, PoolEndFlag;
 	private SposobPodgotovki SortingMethod;
 	private DateTime TimePoint = DateTime.MinValue, TimeStop;
 
@@ -79,7 +85,6 @@ public class RusLesson1 : MonoBehaviour {
 	private GameObject Dialogue, TimeString;
 	private Sprite SpriteRedline1, SpriteRedline2, SpriteEmpty, SpriteBlick, SpriteCheckmark, SpriteHelp;
 	private Color HelpColor, HelpBlinkColor, TextColor, TextBlinkColor, ErrorColor;
-	private static string[] LetterButtonName = { "ButtonL (", ")" };
 
 	private struct Lesson {
 		public string[] Lstr_show, Lstr_corr;
@@ -104,17 +109,24 @@ public class RusLesson1 : MonoBehaviour {
 	private Lesson Lesson1 = new Lesson ();
 
 	public Popup PopupW;
+	public bool EscapeSupported;
 
 
 	// Use this for initialization
 	void Start () {
 
-		LessonStarted = SessionStarted = FirstRun = PromotionFlag = false;
+		LessonStarted = SessionStarted = FirstRun = PromotionFlag = PoolEndFlag = false;
 		Grade = PlayerPrefs.GetInt (GradesConst.grade);
 		LessonRank = PlayerPrefs.GetInt (GradesConst.rank);
 //		int lessonN = PlayerPrefs.GetInt (GradesConst.scene);
 //		Scene s = SceneManager.GetActiveScene ();
 //		if (String.Compare (s.name, Scene1) == 0) {
+
+		if (Application.platform == RuntimePlatform.Android || 
+			Application.platform == RuntimePlatform.WindowsPlayer ||
+			Application.platform == RuntimePlatform.WindowsEditor)
+			EscapeSupported = true;
+		else EscapeSupported = false;
 
 		string s1 = PlayerPrefs.GetString (GradesConst.firstrun);
 		if (string.Compare (s1, GradesConst.started) == 0) {
@@ -205,15 +217,21 @@ Debug.Log ("time best is " + TimeBestSec);
 
 		// для харда - автогенерация примеров на текущую сессию (если не повтор); 
 		// в остальных уровнях все грузится на старте сцены
-		if (LessonRank >= (int)ranks.hard && !restart)
+		if (LessonRank >= (int)ranks.hard && !restart) {
 			GenerateStrings ();   
+			if (!PlayerPrefs.HasKey (GradesConst.hard_help)) {
+				PlayerPrefs.SetInt (GradesConst.hard_help, 1);
+				PopupW.HelpWindow (HardHelp1, HardHelp2, null);
+				}
+			}
 
 		// save state for reload
 		SavedPosition = StartSavedPosition = startpos;
 
 		if (FirstRun || Grade == GradesConst.MinGrade) {
-		// окно с хелпом для первого запуска
-			PopupW.HelpWindow (string.Empty, string.Empty, DrawLesson);
+		// окно с хелпом для первого запуска (два!)
+			PopupW.HelpWindow (string.Empty, string.Empty, PopupW.HelpWindow2);
+			DrawLesson ();
 			}
 		else if (!restart && GetSession (LessonRank)) {
 		// считали сохраненную сессию
@@ -432,7 +450,7 @@ UnityEngine.Debug.Log ("Load session");
 
 		// нужно ли делать членом основного класса, или оставить здесь? 
 		// (экземпляр создается при каждом вызове ф-ии)
-		PhraseGenerator PGen = new PhraseGenerator ();
+		PhraseGenerator PGen = new PhraseGenerator (Level4Path);
 
 		var limit = GradesConst.StringsPerLevel [Grade];
 		var errors = GradesConst.ErrorsPerLevel [Grade];
@@ -498,6 +516,9 @@ UnityEngine.Debug.Log ("Load session");
 				//	img.color.a = 0f;		// делаем прозрачным
 					}
 				}
+		
+		//  заглавная буква
+	//	SetFirstLetter ();
 
 		SessionPhraseNumber++;
 		// запускаем счетчик времени
@@ -507,7 +528,6 @@ UnityEngine.Debug.Log ("Load session");
 
 		// в названии пишем вол-во фраз сделано/всего
 		ShowTitle (SessionPhraseNumber, GradesConst.StringsPerLevel [Grade]);
-Debug.Log (" гиде? ");
 		// для новичков - подсказки
 		if (LessonRank == (int)ranks.zero) //  для дошколенка
 			ShowDialogueString (Helpmsg0 [SessionPhraseNumber-1], GradesConst.TimeToShowHelp);
@@ -521,10 +541,27 @@ Debug.Log (" гиде? ");
 				ShowDialogueString (Helpmsg1 [y], GradesConst.TimeToShowHelp);
 				}
 			}
+
 		// и сразу сохраняем сессию (при выходе тоже сохраняем)
 		SessionStarted = true;
 		SaveSession (LessonRank);
+
 	}
+
+	//  попытка сделать первую букву (заглавную) больше других, чтобы не налезала
+/*	private void SetFirstLetter () {
+		Button b1 = GetButton_ByName (GradesConst.Button20);
+		Button b2 = GetButton_ByName (GradesConst.Button120);
+		Text t2 = b2.GetComponentInChildren<Text>();
+		Text t1 = b1.GetComponentInChildren<Text>();
+		t2.text = t1.text;
+		t1.text = String.Empty;
+		t2.color = TextColor;
+		Image img;
+		if ((img = b2.GetComponentInChildren<Image>()) != null)
+			img.sprite = SpriteEmpty; 
+	}
+*/
 
 //  забиваем в массив символы так, чтобы это корректно отображалось в поле ввода
 	private bool InitNewLesson (char[,] mass, string s) {   
@@ -602,6 +639,7 @@ Debug.Log ("InitNewLessonФраза не поместилась!   " + s + "   �
 			return k;
 			}
 		else {
+			PoolEndFlag = true;
 			ShowDialogueString (EndofPool, GradesConst.TimeToShowHelp);
 			L1.Lesson1b = L1.InitLessonB (L1.Lcount);	
 			return RandPhraseCut (L1);
@@ -617,6 +655,7 @@ Debug.Log ("InitNewLessonФраза не поместилась!   " + s + "   �
 			SavedPosition ++;
 		else {
 			SavedPosition = 0;
+			PoolEndFlag = true;
 			ShowDialogueString (EndofPool, GradesConst.TimeToShowHelp);
 		}
 		return ind;
@@ -720,10 +759,23 @@ Debug.Log (" loadsp = " + sp);
 		//	double thelp = GetTimer (TimeStop);
 		//	if (thelp > GradesConst.HidePhraseTimer)   // спрятать реплику от предыдущего задания спустя 3 сек
 		//		ShowDialogueString (null);
-
 			double tsm = GetTimer (TimePoint); 
 			ShowTimer (tsm);
 		}
+
+		if (EscapeSupported)  // ловим аппаратную кнопку
+			if (Input.GetKeyDown (KeyCode.Escape)) {
+				if (PopupW.MoreHelpWindow.gameObject.activeInHierarchy)
+					PopupW.MoreHelpClose.onClick.Invoke ();
+				else if (PopupW.MyPromWindow.gameObject.activeInHierarchy)
+					PopupW.PromClose.onClick.Invoke ();
+				else if (PopupW.MyEndSessionWindow.gameObject.activeInHierarchy)
+					PopupW.EndSessionClose.onClick.Invoke ();
+				else if (PopupW.MyHelpWindow.gameObject.activeInHierarchy)
+					PopupW.HelpClose.onClick.Invoke ();
+				else 
+					Quit ();
+				}
 	}
 
 
@@ -841,11 +893,30 @@ Debug.Log (" loadsp = " + sp);
 			PlayerPrefs.SetInt (GradesConst.grade, Grade);
 			
 			ClearSavedSession (LessonRank);
+
+			if (PoolEndFlag) {
+				PoolEndFlag = false;
+				if (LessonRank > (int)ranks.zero && LessonRank < (int)ranks.hard)
+					ShowLevelEndInfo ();
+				}
+
 			PopupW.EndSessionWindow (string.Empty, string.Empty, stars, totals);
 			// после чего либо выход в меню, либо nextsession (), либо restartsesion ()
 			}
 		else 
 			DrawLesson ();
+	}
+
+	private void ShowLevelEndInfo () {
+//		if ((LessonRank == (int)ranks.light && Grade >= (int)grades.shkolnik) ||
+//			(LessonRank == (int)ranks.medium && Grade >= (int)grades.gramotei) ||
+//			(LessonRank == (int)ranks.advanced && Grade >= (int)grades.otlichnik))
+		if (Grade >= GradesConst.RankGradeReq[LessonRank])
+			{
+			PopupW.HelpWindow (EndofPool1, EndofPool2, null);
+			}
+		else 
+			PopupW.HelpWindow (EndofPool1, EndofPool3, null);
 	}
 
 	// ф-ия подсчитывает рейтинг игрока в зависимости от кол-ва заданий и времени
@@ -914,6 +985,10 @@ Debug.Log ("перезагрузка!!");
 	}
 
 	private void CorrectLetter_OnScreen (Button b1, Button b2, char letter, int dir ) {
+		// заглавную букву подставляем
+	//	if (String.Compare (b1.name, GradesConst.Button20) == 0)
+	//		b1 = GetButton_ByName (GradesConst.Button120);
+
 		Image img = b1.GetComponentInChildren<Image>();  // мы берем картинку из объекта BtBackground
 		if (img != null) {
 			if (dir == 0)
@@ -966,8 +1041,12 @@ Debug.Log ("перезагрузка!!");
 	}
 
 	private Button GetButton_ByNumber (int n) {
-		string s1 = LetterButtonName[0] + n + LetterButtonName[1];
+		string s1 = GradesConst.LetterButtonName[0] + n + GradesConst.LetterButtonName[1];
 		return GameObject.Find(s1).GetComponent<Button>();
+	}
+
+	private Button GetButton_ByName (string s) {
+		return GameObject.Find(s).GetComponent<Button>();
 	}
 
 	public bool ButtonIsVisible (Button b) {
