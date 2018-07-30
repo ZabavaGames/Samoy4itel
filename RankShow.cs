@@ -12,14 +12,17 @@ public class RankShow : MonoBehaviour {
 
 	public Button Light, Medium, Hard, Advanced, Back;
 	public Image SayCloud2;
+	public Text Title, Novice, Student, Master, Expert, Close;
 
-	private static string Helpach0 = "Выбери уровень сложности. Начни с легкого!";
-	private static string Helpach1 = "Ты открыл более сложный уровень. Попробуй сыграть на нём!";
-	private static string Helpach2 = "Получи еще несколько звёзд, чтобы открыть самый сложный уровень!";
-	private static string Helpach3 = "Выбери уровень сложности. Какой тебе нравится?";
 
 	// Use this for initialization
 	void Start () {
+		Title.text = GradesConst.Difficulty[SM.Language];
+		Novice.text = GradesConst.Novice[SM.Language];
+		Student.text = GradesConst.Student[SM.Language];
+		Master.text = GradesConst.Master[SM.Language];
+		Expert.text = GradesConst.Expert[SM.Language];
+		Close.text = GradesConst.Close[SM.Language];
 		SayCloud2.gameObject.SetActive (false);
 		Awake ();
 	}
@@ -35,25 +38,31 @@ public class RankShow : MonoBehaviour {
 		bool[] matrix;
 		if (SM.Grade < GradesConst.RankGradeReq[(int)ranks.light]) {
 			matrix = new bool[] {false, true, true, true};
-			StartCoroutine (SayHello (Helpach0));
+			StartCoroutine (SayHello (GradesConst.Helpach0[SM.Language]));
 			}
 		else if (SM.Grade < GradesConst.RankGradeReq[(int)ranks.medium]) {
 			matrix = new bool[] {false, false, true, true};
-			StartCoroutine (SayHello (Helpach1));
+			StartCoroutine (SayHello (GradesConst.Helpach1[SM.Language]));
 			}
 		else if (SM.Grade < GradesConst.RankGradeReq[(int)ranks.advanced]) {
 			matrix = new bool[] {false, false, false, true};
-			StartCoroutine (SayHello (Helpach2));
+			StartCoroutine (SayHello (GradesConst.Helpach2[SM.Language]));
 			}
 		else {
 			matrix = new bool[] {false, false, false, false};
-			StartCoroutine (SayHello (Helpach3));
+			StartCoroutine (SayHello (GradesConst.Helpach3[SM.Language]));
 			}
+// для инглиша пока фигачим только так... тоже в ruslesson1.cs :108
+        if (SM.LessonLanguage == (int)languages.english)
+            {
+             matrix = new bool[] { true, true, true, false };
+             StartCoroutine(SayHello(GradesConst.Helpach4[SM.Language]));
+            }
 
-		RestrictAll (matrix);
-	}
+        RestrictAll(matrix);
+        }
 
-	private void RestrictLight (bool state) {
+        private void RestrictLight (bool state) {
 		Light.interactable = !state;
 		Light.GetComponentsInChildren<Text>()[0].color = (state) ? Color.gray : Color.white;
 	}

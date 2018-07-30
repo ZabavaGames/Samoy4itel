@@ -7,75 +7,28 @@ using System;
 using UnityEngine.SceneManagement;
 using UnityEngine.Advertisements;
 using System.IO;
+using System.CodeDom.Compiler;
 
 
 namespace MyMobileProject1 {
 
-public enum SposobPodgotovki { Random4ik, StepByStep, OneFromAll, BlocksFive};
-
 public class RusLesson1 : MonoBehaviour {
 
-	public char[,] Mass_show, Mass_corr;
-	private int Mraw, Mcol, Mcount, Lnumber;
+	public Popup PopupW;
+	public bool EscapeSupported;
+	public int Grade, Language, LessonLanguage;
 
-	private static string[] Messages;
-	private static char[] EndSigns = { '.', '!', '?' };
-	private static char[] Ends = { '\0', '\n' };
-	private static char[] SpaceAndEnds = { ' ', '"', '\'', '.', '!', '?', '\0', '\n' };
-	private const string title = ", задание ";
-	private const string EndofPool = "Ты решил все примеры этого уровня. Попробуй более сложный!";
-	private const string EndofPool1 = "Ты прошёл этот уровень. Можешь начать сначала!";
-	private const string EndofPool2 = "Или попробуй новый уровень сложности! Для этого начни новую игру. Твой прогресс сохранится.";
-	private const string EndofPool3 = "Постарайся исправить больше ошибок, чтобы открыть более сложный уровень.";
-	private const string HardHelp1 = "Ты выбрал сложный уровень. Он отличается от предыдущих.";
-	private const string HardHelp2 = "В этом режиме игры ты увидишь примеры из словаря русских пословиц и поговорок со случайными ошибками в них. Больше никаких повторов - количество примеров бесконечно!";
-	private static string[] Helpmsg0 = new string[] { 
-		"Безударная гласная!",
-		"Замени букву!",
-		"Лишняя буква!"
-		 };
-	private static string[] Helpmsg1 = new string[] { 
-//		"Замени букву, чтобы одно слово превратить в другое!",
-//		"Проверь ударения и исправь безударную гласную!",
-//		"Исправь согласную - звонкую на глухую, или наоборот",
-//		"Напиши правильно словарное слово!",
-//		"В одном из слов есть лишняя буква. Вычеркни ее!",
-//		"Вспомни правило, чтобы писать правильно!"
-		"Замени букву!",
-		"Безударная гласная!",
-		"Звонкая или глухая?",
-		"Словарное слово!",
-		"Лишняя буква!",
-		"Вспомни правило!"
-		 };
-
-	private const string StringsPath = "Strings/";
-	private const string msgfile = "messages.txt";
-	private const string Level1Path = "1Уровень/";
-	private const string Level21Path = "2Уровень/1ошибка/";
-	private const string Level22Path = "2Уровень/2ошибки/";
-	private const string Level3Path = "3Уровень/";
-	private const string Level4Path = "4Уровень/";
-	private static string[] grade0files_show = new string[] {Level1Path + "0_Ош_Дошколёнок.txt"};  
-	private static string[] grade0files_corr = new string[] {Level1Path + "0_В_Дошколёнок.txt"};
-	private static string[] grade1files_show = new string[] {Level1Path + "1_Ош_001_зам15.txt", Level1Path + "1_Ош_002_пров15.txt", Level1Path + "1_Ош_003_согл15.txt", Level1Path + "1_Ош_004_слов15.txt", Level1Path + "1_Ош_005_лиш15.txt", Level1Path + "1_Ош_006_прав15.txt"}; 
-	private static string[] grade1files_corr = new string[] {Level1Path + "1_В_001_зам15.txt", Level1Path + "1_В_002_пров15.txt", Level1Path + "1_В_003_согл15.txt", Level1Path + "1_В_004_слов15.txt", Level1Path + "1_В_005_лиш15.txt", Level1Path + "1_В_006_прав15.txt"}; 
-	private static string[] grade2files_show = new string[] {Level21Path + "2_1_Ош_001_зам20.txt", Level21Path + "2_1_Ош_002_пров10.txt", Level21Path + "2_1_Ош_003_согл10.txt", Level21Path + "2_1_Ош_004_слов10.txt", Level21Path + "2_1_Ош_005_лиш20.txt"}; 
-	private static string[] grade2files_corr = new string[] {Level21Path + "2_1_В_001_зам20.txt", Level21Path + "2_1_В_002_пров10.txt", Level21Path + "2_1_В_003_согл10.txt", Level21Path + "2_1_В_004_слов10.txt", Level21Path + "2_1_В_005_лиш20.txt"}; 
-	private static string[] grade2_files_show = new string[] {Level22Path + "2_2_Ош_001_зам20.txt", Level22Path + "2_2_Ош_002_пров30.txt", Level22Path + "2_2_Ош_003_согл30.txt", Level22Path + "2_2_Ош_004_слов30.txt", Level22Path + "2_2_Ош_005_лиш20.txt"}; 
-	private static string[] grade2_files_corr = new string[] {Level22Path + "2_2_В_001_зам20.txt", Level22Path + "2_2_В_002_пров30.txt", Level22Path + "2_2_В_003_согл30.txt", Level22Path + "2_2_В_004_слов30.txt", Level22Path + "2_2_В_005_лиш20.txt"}; 
-	private static string[] grade3files_show = new string[] {Level3Path + "3_2_Ош_001_70", Level3Path + "3_3_Ош_001_60"}; 
-	private static string[] grade3files_corr = new string[] {Level3Path + "3_2_В_001_70", Level3Path + "3_3_В_001_60"}; 
-	private string[][] sourcefiles_show;
-	private string[][] sourcefiles_corr;
-
-	private int Grade;
 	private int SessionScore, ErrorsCorrected, SessionPhraseNumber, SessionLimit, LessonRank, 
 				SavedPosition, StartSavedPosition, TheGapInFile, TimeBestSec, TimeCapMsec;
 	private double SessionTime;
 	private bool LessonStarted, SessionStarted, FirstRun, PromotionFlag, PoolEndFlag;
 	private SposobPodgotovki SortingMethod;
 	private DateTime TimePoint = DateTime.MinValue, TimeStop;
+
+	public char[,] Mass_show, Mass_corr;
+	private int Mraw, Mcol, Mcount, Lnumber;
+	private string[][] sourcefiles_show;
+	private string[][] sourcefiles_corr;
 
 	private GridLayoutGroup LettersGrid;
 	private Button[] BtList;
@@ -108,21 +61,27 @@ public class RusLesson1 : MonoBehaviour {
 	}
 	private Lesson Lesson1 = new Lesson ();
 
-	public Popup PopupW;
-	public bool EscapeSupported;
-
 
 	// Use this for initialization
 	void Start () {
-
 		LessonStarted = SessionStarted = FirstRun = PromotionFlag = PoolEndFlag = false;
+
+		string s = PlayerPrefs.GetString (GradesConst.lang);
+		int i = Array.IndexOf (GradesConst.langs, s);
+		Language = (int)languages.russian + i;
+
 		Grade = PlayerPrefs.GetInt (GradesConst.grade);
 		LessonRank = PlayerPrefs.GetInt (GradesConst.rank);
-//		int lessonN = PlayerPrefs.GetInt (GradesConst.scene);
-//		Scene s = SceneManager.GetActiveScene ();
-//		if (String.Compare (s.name, Scene1) == 0) {
 
-		if (Application.platform == RuntimePlatform.Android || 
+      // выбираем тип урока - русский или английский;
+        if (Application.identifier == GradesConst.ApplicationIdRus)
+            LessonLanguage = (int)languages.russian;
+        else if (Application.identifier == GradesConst.ApplicationIdEng)
+            LessonLanguage = (int)languages.english;
+        else
+            Quit ();
+
+        if (Application.platform == RuntimePlatform.Android || 
 			Application.platform == RuntimePlatform.WindowsPlayer ||
 			Application.platform == RuntimePlatform.WindowsEditor)
 			EscapeSupported = true;
@@ -134,11 +93,27 @@ public class RusLesson1 : MonoBehaviour {
 			FirstRun = true;
 			}
 
-		sourcefiles_show = new string[][] { grade0files_show, grade1files_show, MergeStringArrays (grade2files_show, grade2_files_show), grade3files_show };
-		sourcefiles_corr = new string[][] { grade0files_corr, grade1files_corr, MergeStringArrays (grade2files_corr, grade2_files_corr), grade3files_corr };
+          //		int lessonN = PlayerPrefs.GetInt (GradesConst.scene);
+         Scene Sc = SceneManager.GetActiveScene();
+         if (String.Compare(Sc.name, GradesConst.Scene1) == 0) { 
+            sourcefiles_show = new string[][] {
+                GradesConst.grade0files_show, GradesConst.grade1files_show,
+                MergeStringArrays (GradesConst.grade2files_show, GradesConst.grade2_files_show),
+                GradesConst.grade3files_show };
+            sourcefiles_corr = new string[][] {
+                GradesConst.grade0files_corr, GradesConst.grade1files_corr,
+                MergeStringArrays (GradesConst.grade2files_corr, GradesConst.grade2_files_corr),
+                GradesConst.grade3files_corr };
+            }
+            else if (String.Compare(Sc.name, GradesConst.Scene2) == 0)
+            {
+                LessonRank = (int)ranks.hard;  //  для инглиша пока так...  тоже в rankshow.cs :56
+            }
+            else
+                Quit();
 
-	//	LoadStrings_noRanks ();
-		LoadStrings_byRanks ();
+        //	LoadStrings_noRanks ();
+        LoadStrings_byRanks ();
 
 		StartSession (0, false);
 		}
@@ -178,7 +153,7 @@ public class RusLesson1 : MonoBehaviour {
 		BtList = LettersGrid.GetComponentsInChildren <Button>();
 
 		Mcount = BtList.Length;
-		Mraw = GradesConst.RawsOnScreen;   // Ааааа! константа...
+		Mraw = GradesConst.RawsOnScreen;  
 		Mcol = Mcount/Mraw;
 
 //		for (int i = 0; i < Mcount; i++)
@@ -212,7 +187,7 @@ Debug.Log ("time best is " + TimeBestSec);
 		SessionLimit = GradesConst.StringsPerLevel[Grade];
 		SessionTime = 0.0;
 	//	ShowTimer (0f);
-		TText.text = "0:0";
+		TText.text = GradesConst.DoubleZeroes;
 		ShowTitle (0, 0);
 
 		// для харда - автогенерация примеров на текущую сессию (если не повтор); 
@@ -221,7 +196,7 @@ Debug.Log ("time best is " + TimeBestSec);
 			GenerateStrings ();   
 			if (!PlayerPrefs.HasKey (GradesConst.hard_help)) {
 				PlayerPrefs.SetInt (GradesConst.hard_help, 1);
-				PopupW.HelpWindow (HardHelp1, HardHelp2, null);
+				PopupW.HelpWindow (GradesConst.HardHelp1[Language], GradesConst.HardHelp2[Language], null);
 				}
 			}
 
@@ -245,7 +220,8 @@ UnityEngine.Debug.Log ("Load session");
 	}
 
 	private void ShowTitle (int k, int m) {
-		LessonTitle.text = GradesConst.GradeStringsRus [Grade] + title + k + "/" + m;
+		LessonTitle.text = GradesConst.GradeStrings[Language][Grade] + GradesConst.Zadanie[Language] + k + 
+							GradesConst.Slash + m;
 	}
 
 	// грузим примеры в соответствии со старой системой прогрессии игрока
@@ -324,7 +300,7 @@ UnityEngine.Debug.Log ("Load session");
 		if (LessonRank < 10) {
 			show = LoadLstrings (filenames1);
 			corr = LoadLstrings (filenames2);
-//			Lesson1 = new Lesson ();
+//			Lesson1 = new LessonLanguage ();
 			Lesson1.InitLesson (show, corr);
 			}
 	//	else
@@ -337,7 +313,7 @@ UnityEngine.Debug.Log ("Load session");
 	private void LoadStrings_byRanks () {
 		string[] filenames1, filenames2; 
 
-		Messages = LoadStringsFromFile (msgfile);
+	//	Messages = LoadStringsFromFile (GradesConst.Msgfile);
 
 		SortingMethod = SposobPodgotovki.Random4ik;
 //		SavedPosition = 0;
@@ -424,9 +400,9 @@ UnityEngine.Debug.Log ("Load session");
 	}
 
 	private string[] LoadStringsFromFile (string filename) {
-		string s = filename.Split ('.')[0];
-		TextAsset t = Resources.Load (StringsPath + s, typeof (TextAsset)) as TextAsset;
-		string[] s1 = t.text.Split ('\n');
+		string s = filename.Split (GradesConst.Point)[0];
+		TextAsset t = Resources.Load (GradesConst.StringsPath + s, typeof (TextAsset)) as TextAsset;
+		string[] s1 = t.text.Split (GradesConst.EndOfLine);
 
 		return s1;
 	}
@@ -450,7 +426,7 @@ UnityEngine.Debug.Log ("Load session");
 
 		// нужно ли делать членом основного класса, или оставить здесь? 
 		// (экземпляр создается при каждом вызове ф-ии)
-		PhraseGenerator PGen = new PhraseGenerator (Level4Path);
+		PhraseGenerator PGen = new PhraseGenerator (GradesConst.Level4Path);
 
 		var limit = GradesConst.StringsPerLevel [Grade];
 		var errors = GradesConst.ErrorsPerLevel [Grade];
@@ -530,7 +506,7 @@ UnityEngine.Debug.Log ("Load session");
 		ShowTitle (SessionPhraseNumber, GradesConst.StringsPerLevel [Grade]);
 		// для новичков - подсказки
 		if (LessonRank == (int)ranks.zero) //  для дошколенка
-			ShowDialogueString (Helpmsg0 [SessionPhraseNumber-1], GradesConst.TimeToShowHelp);
+			ShowDialogueString (GradesConst.Helpmsg0 [Language][SessionPhraseNumber-1], GradesConst.TimeToShowHelp);
 		else if (LessonRank == (int)ranks.light) {
 			int files = sourcefiles_show [LessonRank].Length;
 			const int five = GradesConst.Categories; 
@@ -538,7 +514,7 @@ UnityEngine.Debug.Log ("Load session");
 			// по следам ф-ии PrepBlocksFive
 				int x = Lnumber / five;
 				int y = x % files;
-				ShowDialogueString (Helpmsg1 [y], GradesConst.TimeToShowHelp);
+				ShowDialogueString (GradesConst.Helpmsg1[Language][y], GradesConst.TimeToShowHelp);
 				}
 			}
 
@@ -567,15 +543,15 @@ UnityEngine.Debug.Log ("Load session");
 	private bool InitNewLesson (char[,] mass, string s) {   
 		string s1 = s;
 		int ind;
-		if ((ind = s.IndexOfAny (Ends)) >= 0)
+		if ((ind = s.IndexOfAny (GradesConst.Ends)) >= 0)
 	 	// убираем всю фигню в конце фразы
-			s1 = s.Split (Ends)[0] + s[ind].ToString ();  
+			s1 = s.Split (GradesConst.Ends)[0] + s[ind].ToString ();  
 
 		bool flag = true;
 		char[] cc;
 		int d, j = 0;
 		// разбиваем фразу на слова
-		string[] ss = s1.Split (' ');  		
+		string[] ss = s1.Split (GradesConst.Spacebar);  		
 
 		for (int i = 0; i < ss.Length; i++) {
 			ss[i].Trim ();
@@ -590,7 +566,7 @@ UnityEngine.Debug.Log ("Load session");
 				flag = AddSymbol (mass, j++, cc[z]);
 			// и добавляем пробел, если это не конец строки
 			if (j%Mcol > 0)        				
-				flag = AddSymbol (mass, j++, ' ');
+				flag = AddSymbol (mass, j++, GradesConst.Spacebar);
 			// проверка на пределы
 			if (d >= Mcol || j > Mcount/2) {  // j/Mcol >= Mraw/2 || 
 				// туши свет
@@ -640,7 +616,7 @@ Debug.Log ("InitNewLessonФраза не поместилась!   " + s + "   �
 			}
 		else {
 			PoolEndFlag = true;
-			ShowDialogueString (EndofPool, GradesConst.TimeToShowHelp);
+			ShowDialogueString (GradesConst.EndofPool[Language], GradesConst.TimeToShowHelp);
 			L1.Lesson1b = L1.InitLessonB (L1.Lcount);	
 			return RandPhraseCut (L1);
 			}
@@ -656,18 +632,18 @@ Debug.Log ("InitNewLessonФраза не поместилась!   " + s + "   �
 		else {
 			SavedPosition = 0;
 			PoolEndFlag = true;
-			ShowDialogueString (EndofPool, GradesConst.TimeToShowHelp);
+			ShowDialogueString (GradesConst.EndofPool[Language], GradesConst.TimeToShowHelp);
 		}
 		return ind;
 	}
 
 	// выбираем по одной фразе из каждого отдельного файла с примерами, чтобы в задании было по
-	// одной фразе каждого типа; поскольку все фразы уже свалены в один пул Lesson, то берем
+	// одной фразе каждого типа; поскольку все фразы уже свалены в один пул LessonLanguage, то берем
 	// фразы из пула через интервал (работает только для файлов с одинаковым кол-вом примеров);
 	// промежуток (TheGapInFile) высчитывается на этапе загрузки файлов.
 	// Также сохраняем позицию в пуле, чтобы после запуска новой сессии или выхода в главное меню
 	// продолжить с этого же места
-/*	private int GetOnePhrase_FromAllFiles (Lesson L1) {
+/*	private int GetOnePhrase_FromAllFiles (LessonLanguage L1) {
 		int sp = SavedPosition;
 		if (SavedPosition + TheGapInFile < L1.Lcount)
 			SavedPosition += TheGapInFile;
@@ -838,7 +814,7 @@ Debug.Log (" loadsp = " + sp);
 		int min, sec;
 		min = t/60;
 		sec = t%60;
-		TText.text = min + ":" + sec;
+		TText.text = min + GradesConst.TwoDots.ToString() + sec;
 	}
 
 	private void ShowDialogueString (string msg, int time) {
@@ -861,15 +837,15 @@ Debug.Log (" loadsp = " + sp);
 	// результат одной сессии
 	private IEnumerator DisplayResult (double tsm) {
 
-		string msg = Messages [Random4ik (Messages.Length)];
+		string msg = GradesConst.Messages [Language][Random4ik (GradesConst.Messages.Length)];
 	//	PopupW.EndOfTurn_Popup (msg, tsm);
 	
 		// пауза в 1сек, чтобы успели увидеть зачеркивание
 		if (tsm > 0) {  // если фразу скипнули, то -1 (не показываем)
-			if (Random4ik (5) == 2) {  // счастливый номер, 1 из 5
+			if (Random4ik (GradesConst.ChanceToShowGrats) == 2) {  // счастливый номер, 1 из 5
 				ShowDialogueString (msg, 0);
 				}
-			yield return new WaitForSeconds (1.5f);
+			yield return new WaitForSeconds (GradesConst.PhraseDoneDelay);
 			}
 
 		if (SessionPhraseNumber >= SessionLimit) {  // конец сессии, тушим свет, сливаем воду
@@ -913,10 +889,10 @@ Debug.Log (" loadsp = " + sp);
 //			(LessonRank == (int)ranks.advanced && Grade >= (int)grades.otlichnik))
 		if (Grade >= GradesConst.RankGradeReq[LessonRank])
 			{
-			PopupW.HelpWindow (EndofPool1, EndofPool2, null);
+			PopupW.HelpWindow (GradesConst.EndofPool1[Language], GradesConst.EndofPool2[Language], null);
 			}
 		else 
-			PopupW.HelpWindow (EndofPool1, EndofPool3, null);
+			PopupW.HelpWindow (GradesConst.EndofPool1[Language], GradesConst.EndofPool3[Language], null);
 	}
 
 	// ф-ия подсчитывает рейтинг игрока в зависимости от кол-ва заданий и времени
@@ -936,7 +912,7 @@ UnityEngine.Debug.Log (Ttime + " " + k1 + " " + k2);
 		// здесь смотрим, сколько звезд нужно на уровень выше
 		if (Grade < GradesConst.MaxGrade && totals >= GradesConst.StarsToPromote[grade+1]) {  
 			grade ++;
-			string titul = GradesConst.GradeStringsRus[grade];
+			string titul = GradesConst.GradeStrings[Language][grade];
 			PromotionFlag = true;
 		//	Action prom = Reload;
 			PopupW.PromotionWindow (string.Empty, string.Empty, titul, null);
@@ -981,7 +957,7 @@ Debug.Log ("перезагрузка!!");
 		int	col = i%Mcol;
 		if (raw < Mraw && col < Mcol)
 			return arr[raw, col];
-		else return '\0';
+		else return GradesConst.ZeroChar;
 	}
 
 	private void CorrectLetter_OnScreen (Button b1, Button b2, char letter, int dir ) {
@@ -1055,7 +1031,7 @@ Debug.Log ("перезагрузка!!");
 			int raw = n / Mcol;
 			if (raw%2 != 0) { // нечетные строки видны
 				char c = GetSymbol (Mass_show, n); 
-				int ind = c.ToString().IndexOfAny (SpaceAndEnds);
+				int ind = c.ToString().IndexOfAny (GradesConst.SpaceAndEnds);
 				if (ind < 0) 
 			//	if (!char.IsWhiteSpace (c) && c != '\0' && c != ' ')  // в строке не пустой символ
 					return true;
@@ -1155,7 +1131,7 @@ Debug.Log ("перезагрузка!!");
 		int k; 
 		for (k = i; k > 0; k--) {
 			char c = GetSymbol (s, k);
-			int ind = c.ToString().IndexOfAny (SpaceAndEnds);
+			int ind = c.ToString().IndexOfAny (GradesConst.SpaceAndEnds);
 			if (ind >= 0) 
 					break;
 			}
@@ -1167,7 +1143,7 @@ Debug.Log ("перезагрузка!!");
 	private int GetWord_LastIndex (char[,] s, int i) {
 		int k;
 		for (k = i; k < Mcount; k++)
-				if (GetSymbol (s, k) == ' ') 
+				if (GetSymbol (s, k) == GradesConst.Spacebar) 
 					break;
 		return k;
 	}

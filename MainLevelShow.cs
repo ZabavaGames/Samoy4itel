@@ -10,32 +10,12 @@ namespace MyMobileProject1 {
 
 public class MainLevelShow : MonoBehaviour {
 
-	public Text LevelString;
+	public Text Title, Level, SayCloud_text, SCtext, Play, Control, Exit, Score, Email, Language;
 	public Image Premium;
 	public Image StarsCount;
 	public GameObject SayCloud1;
-	public Text SayCloud_text;
-	public Text SCtext;
 	public StartupManager SM;
 
-	private const string HelloWorld = "Привет!";
-	private const string Level = "Твой уровень: ";
-	private static string[] reklama = {
-		"Рекламу можно отключить, приобретя пакет \"Премиум\" в разделе Покупки.",
-		"Рекламу можно отключить, приобретя пакет \"Премиум\" в разделе Покупки.",
-		"Рекламу можно отключить, приобретя пакет \"Премиум\" в разделе Покупки.",
-		};
-	private static string[] helpa = {
-		"Если ты не закончил задание и вышел, то сможешь потом продолжить.",
-		"Ты можешь повторить задание, если оно тебе понравилось.",
-		"Если ты не можешь найти ошибку, воспользуйся подсказкой!",
-		"Когда ищешь ошибку, не торопись. Правильный ответ важнее, чем потраченное время!",
-		"Непонятный пример можно пропустить, но это ухудшит твой результат. :-(",
-		"Задания кажутся слишком лёгкими? Попробуй более сложный уровень!",
-		"На сложном уровне тебя ждут случайные примеры - всегда новые!",
-		"Если тебе нравится игра, поставь нам оценку в Play Market. :-)",
-		"Велик и могуч русский язык! А ты его хорошо знаешь?"
-		 };
 	private string[] replika;		
 	List<int> ReplikaDubl; 
 	private bool state;
@@ -47,16 +27,23 @@ public class MainLevelShow : MonoBehaviour {
 		state = SM.InAppItems.DisableAds; 
 		grade = SM.Grade;
 		stars = SM.TotalStars;
-		LevelString.text = Level + SM.GetGradeString ();
+		Level.text = GradesConst.LevelString[SM.Language] + SM.GetGradeString ();
+		Title.text = GradesConst.TitleString[SM.Language];
+		Play.text = GradesConst.PlayString[SM.Language];
+		Control.text = GradesConst.ControlString[SM.Language];
+		Exit.text = GradesConst.ExitString[SM.Language];
+		Email.text = GradesConst.EmailString[SM.Language];
+		Score.text = GradesConst.ScoreString[SM.Language];
+		Language.text = GradesConst.langs[SM.Language];
 		Premium.gameObject.SetActive (state);
 		TimePoint = DateTime.Now;
 
 		// для показа подсказок, с упоминанием рекламы и без него
 		// без повторов, но в случайном порядке
 		if (!SM.InAppItems.DisableAds && !SM.FirstRun) {
-			replika = MergeStringArrays (reklama, helpa);
+			replika = MergeStringArrays (GradesConst.Reklama[SM.Language], GradesConst.Help[SM.Language]);
 			}
-		else replika = helpa;
+		else replika = GradesConst.Help[SM.Language];
 		ReplikaDubl = InitDublikat (replika.Length);
 
 		if (SM.SayHello)		
@@ -86,7 +73,7 @@ public class MainLevelShow : MonoBehaviour {
 		if (state != SM.InAppItems.DisableAds || grade != SM.Grade) {
 			state = SM.InAppItems.DisableAds;
 			grade = SM.Grade;
-			LevelString.text = Level + SM.GetGradeString ();
+			Level.text = GradesConst.LevelString[SM.Language] + SM.GetGradeString ();
 			Premium.gameObject.SetActive (state);
 		}
 		stars = (stars > 999) ? 999 : stars;
@@ -95,7 +82,7 @@ public class MainLevelShow : MonoBehaviour {
 
 	// вызывает StartupManager
 	public void SayHello (int start_time, int duration) {
-		StartCoroutine (SayCloud (HelloWorld, start_time, duration));
+		StartCoroutine (SayCloud (GradesConst.HelloWorld[SM.Language], start_time, duration));
 	}
 
 	public void SaySomething (int start_time, int duration) {

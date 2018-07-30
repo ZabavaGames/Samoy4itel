@@ -17,25 +17,6 @@ public class Popup : MonoBehaviour {
 	public Button MoreHelpClose, PromClose, HelpClose, EndSessionClose;
 	private Action PopupCloseAction, HelpCloseAction, PromCloseAction;
 
-	private static string YourTime = "Ваше время: ";  // :-(( константа
-	private static string YourResult = "Ваш результат: ";  
-	private static string Percents = " процентов.";
-	private static string Congratulations = "Поздравляем! Ты успешно выполнил все задания!";
-	private static string HelpPhrase1 = "Добро пожаловать! Глупенький Двойкин наделал ошибок. Исправь их волшебной ручкой!";
-	private static string HelpPhrase2 = "Просто зачеркни неправильную букву пальцем. Попробуй! Желаем удачи!";
-	private static string EndPhrase1 = "Прекрасно! Ты справился с заданием! Получи награду!";
-	private static string EndPhrase2 = "Собирай звезды, чтобы повысить свой уровень. У тебя всего звезд: ";
-	private static string EndPhrase3 = "К сожалению, твой результат не позволил тебе получить ни одной звезды. Не расстраивайся! Попытайся еще раз!";
-	private static string PromPhrase1 = "Великолепно! Ты достиг нового уровня знаний!";
-	private static string PromPhrase2 = "Продолжай получать достижения и не забудь поделиться со своими друзьями!";
-	private static string HelpText1 = "Исправление";
-	private static string HelpText2 = "Подсказка подсвечивает слова, в которых есть ошибки";
-	private static string HelpText3 = "Таймер";
-	private static string HelpText4 = "Пропустить пример и перейти к следующему";
-	private static string HelpText5 = "Выход в меню";
-	private static string HelpText6 = "Твой помощник. Он дает ценные советы!";
-	private static string NewLevel = "Получен_новый_уровень!";
-	private static string Nazvanie = "Сам_себе_учитель";
 
 	// Use this for initialization
 	void Start () {
@@ -119,7 +100,7 @@ public class Popup : MonoBehaviour {
 		SetPopup ();
 	// установить в окне время и очки
 		time = Math.Round (time/1000, 2);  // переводим в сек. и округляем
-		Ttime.text = YourTime + time.ToString () + " c.";
+			Ttime.text = GradesConst.YourTime[RS.Language] + time.ToString () + GradesConst.Seconds[RS.Language];
 		Tmess.text = message;
 
 	//	PopupCloseAction = RS.DrawLesson;
@@ -128,8 +109,8 @@ public class Popup : MonoBehaviour {
 	public void EndOfSession_Popup (int score) {
 		SetPopup ();  // тут нужно другое окно, с кнопками заново, выход и т.д.
 
-		Msg1.text = YourResult + score.ToString () + Percents;
-		Msg2.text = Congratulations;
+		Msg1.text = GradesConst.YourResult[RS.Language] + score.ToString () + GradesConst.Percents[RS.Language];
+		Msg2.text = GradesConst.Congratulations[RS.Language];
 	}
 
 	public void HelpWindow (string message1, string message2, Action start) {
@@ -137,10 +118,10 @@ public class Popup : MonoBehaviour {
 
 		if (message1 != string.Empty)
 			Msg1.text = message1;
-		else Msg1.text = HelpPhrase1;
+		else Msg1.text = GradesConst.HelpPhrase1[RS.Language];
 		if (message2 != string.Empty)
 			Msg2.text = message2;
-		else Msg2.text = HelpPhrase2;
+		else Msg2.text = GradesConst.HelpPhrase2[RS.Language];
 
 		HelpCloseAction = start;
 	}
@@ -148,12 +129,12 @@ public class Popup : MonoBehaviour {
 	public void HelpWindow2 () {
 		SetMoreHelpWindow ();
 
-		Msg1.text = HelpText1;
-		Msg2.text = HelpText2;
-		Msg3.text = HelpText3;
-		Msg4.text = HelpText4;
-		Msg5.text = HelpText5;
-		Msg6.text = HelpText6;
+		Msg1.text = GradesConst.HelpText1[RS.Language];
+		Msg2.text = GradesConst.HelpText2[RS.Language];
+		Msg3.text = GradesConst.HelpText3[RS.Language];
+		Msg4.text = GradesConst.HelpText4[RS.Language];
+		Msg5.text = GradesConst.HelpText5[RS.Language];
+		Msg6.text = GradesConst.HelpText6[RS.Language];
 	}
 
 	public void EndSessionWindow (string message1, string message2, int stars, int totals) {
@@ -162,11 +143,11 @@ public class Popup : MonoBehaviour {
 		if (message1 != string.Empty)
 			Msg1.text = message1;
 		else if (stars < 1)
-			Msg1.text = EndPhrase3;
-		else Msg1.text = EndPhrase1;
+			Msg1.text = GradesConst.EndPhrase3[RS.Language];
+		else Msg1.text = GradesConst.EndPhrase1[RS.Language];
 		if (message2 != string.Empty)
 			Msg2.text = message2;
-		else Msg2.text = EndPhrase2;
+		else Msg2.text = GradesConst.EndPhrase2[RS.Language];
 
 		Msg2.text += totals.ToString();
 	}
@@ -176,10 +157,10 @@ public class Popup : MonoBehaviour {
 
 		if (message1 != string.Empty)
 			Msg1.text = message1;
-		else Msg1.text = PromPhrase1;
+		else Msg1.text = GradesConst.PromPhrase1[RS.Language];
 		if (message2 != string.Empty)
 			Msg2.text = message2;
-		else Msg2.text = PromPhrase2;
+		else Msg2.text = GradesConst.PromPhrase2[RS.Language];
 
 		PromCloseAction = prom;
 	}
@@ -220,8 +201,8 @@ public class Popup : MonoBehaviour {
 
 	public void ClosePromotion (int param) {
 		string url = String.Empty,
-			newlevel = NewLevel,
-			game = Nazvanie,
+			newlevel = GradesConst.NewLevel[RS.Language],
+			game = GradesConst.Nazvanie[RS.Language],
 			pict = "https://lh3.googleusercontent.com/AYj4Gqahus0IFLHDPlhw11OCkToySgLWsgrUVt2CZOSE438xjsIposVO-NjzemfPGqg=w720-h310-rw",
 			fblink = "https://www.facebook.com/sharer/sharer.php?u=",
 			fbgroup = "https://www.facebook.com/groups/46232190085663",

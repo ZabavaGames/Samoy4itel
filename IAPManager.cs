@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Purchasing;
+using UnityEngine.Purchasing.Extension;
 
 namespace MyMobileProject1 {
 
@@ -42,6 +43,7 @@ namespace MyMobileProject1 {
 	    public static string gtest3 = "android.test.purchased";
 		
 		public StartupManager Starter;
+ //       private IPurchasingModule StandardPurchasingModule;
 
         void Start()
         {
@@ -61,10 +63,11 @@ namespace MyMobileProject1 {
                 // ... we are done here.
                 return;
             }
-            
+
+           
             // Create a builder, first passing in a suite of Unity provided stores.
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-            
+   
             // Add a product to sell / restore by way of its identifier, associating the general identifier
             // with its store-specific identifiers.
             builder.AddProduct(kProductIDConsumable, ProductType.Consumable);
@@ -223,7 +226,7 @@ namespace MyMobileProject1 {
                 apple.RestoreTransactions((result) => {
                     // The first phase of restoration. If no more responses are received on ProcessPurchase then 
                     // no purchases are available to be restored.
-                    Debug.Log("RestorePurchases continuing: " + result + ". If no further messages, no purchases available to restore.");
+                   Debug.Log("RestorePurchases continuing: " + result + ". If no further messages, no purchases available to restore.");
                 });
             }
             // Otherwise ...

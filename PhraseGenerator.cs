@@ -13,65 +13,61 @@ namespace MyMobileProject1 {
 
 	public class PhraseGenerator {
 
-		private string[] Phrases;
-		private static string[] SourceFiles = new string[] //{"dal1000-1.txt", "dal1000-2.txt",
-			{"Берсеньева-1.txt"};//, "Берсеньева-2.txt", "sysoev.txt"};
+		public RusLesson1 RS;
 		private static int SourceLength, SourceIndex;
+		private string[] Phrases, SourceFiles;
 
-		private static char[] Signs = { '.', '!', '?' };
-		private static char[] Ends = { '\0', '\n' };
-		private static char[] SpaceAndEnds = { ' ', '.', '!', '?', '\0', '\n' };
-
-		private static char[] CharTable, RusCharTable = {'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж',
-									 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 
-								'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я' };
-
-		private static char[][] CharTable_closest, RusCharTable_closest = new char[][] {
-			new char[] {'к', 'е', 'в', 'п', 'с', 'м'}, new char[] {'л', 'д', 'ь', 'ю', '_'}, 
-			new char[] {'у', 'к', 'ы', 'а', 'ч', 'с'}, new char[] {'7', '8', 'н', 'ш', 'р', 'о'},
-   			new char[] {'щ', 'з', 'л', 'ж', 'б', 'ю'}, new char[] {'5', '6', 'к', 'н', 'а', 'п'},
-			new char[] {'1', 'е', 'ё'}, new char[] {'з', 'х', 'д', 'э', 'ю', '_'}, 
-			new char[] {'0', '-', 'щ', 'х', 'д', 'ж'}, new char[] {'п', 'р', 'м', 'т', '_'}, 
-			new char[] {'1', '2', 'ц', 'ф'}, new char[] {'4', '5', 'у', 'е', 'в', 'а'},
-			new char[] {'ш', 'щ', 'о', 'д', 'ь', 'б'}, new char[] {'а', 'п', 'с', 'и', '_'}, 
-			new char[] {'6', '7', 'е', 'г', 'п', 'р'}, new char[] {'г', 'ш', 'р', 'л', 'т', 'ь'},
-			new char[] {'е', 'н', 'а', 'р', 'м', 'и'}, new char[] {'н', 'г', 'п', 'о', 'и', 'т'},
-			new char[] {'в', 'а', 'ч', 'м', '_'}, new char[] {'р', 'о', 'и', 'ь', '_'}, 
-			new char[] {'3', '4', 'ц', 'к', 'ы', 'в'}, new char[] {'й', 'ц', 'ы', 'я'}, 
-			new char[] {'-', '=', 'з', 'ъ', 'ж', 'э'}, new char[] {'2', '3', 'й', 'у', 'ф', 'ы'},
-			new char[] {'ы', 'в', 'я', 'с', '\\', '_'}, new char[] {'8', '9', 'г', 'щ', 'о', 'л'},
-			new char[] {'9', '0', 'ш', 'з', 'л', 'д'}, new char[] {'=', '\\', 'х', 'э', 'ь'}, 
-			new char[] {'ц', 'у', 'ф', 'в', 'я', 'ч'}, new char[] {'о', 'л', 'т', 'б', '_', 'ъ'},
-			new char[] {'х', 'ъ', 'ж', '_'}, new char[] {'д', 'ж', 'б', '_'}, 
-			new char[] {'ф', 'ы', 'ч', '\\'}
-			};
-
-		private static char[] CharTable_zvon_pairs, RusCharTable_zvon_pairs = {
-			'я', 'п', 'ф', 'к', 'т', 'э', 'о', 'ш', 'с', 'ы', 'й', 'г', 'л', 'м', 'н', 'ё', 'б', 
-			'р', 'з', 'д', 'ю', 'в', 'х', 'ц', 'ч', 'ж', 'щ', 'ь', 'и', 'ъ', 'е', 'у', 'а' };
-
-		private static char[] CharTable_udarn_pairs, RusCharTable_udarn_pairs = {
-			'о', 'б', 'в', 'г', 'д', 'и', 'о', 'ж', 'з', 'е', 'й', 'к', 'л', 'м', 'н', 'а', 'п', 
-			'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'е', 'ю', 'я' };
+		private static char[] EndSigns = GradesConst.EndSigns;
+		private static char[] Ends = GradesConst.Ends;
+		private static char[] SpaceAndEnds = GradesConst.SpaceAndEnds;
 
 		private static int CharTableSize;
-		
+		private static char[] CharTable, 
+            RusCharTable = GradesConst.RusCharTable,
+			EngCharTable = GradesConst.EngCharTable;
+
+        private static char[][] CharTable_closest,
+            RusCharTable_closest = GradesConst.RusCharTable_closest,
+            EngCharTable_closest = GradesConst.EngCharTable_closest;
+
+        private static char[] CharTable_zvon_pairs,
+            RusCharTable_zvon_pairs = GradesConst.RusCharTable_zvon_pairs,
+            EngCharTable_zvon_pairs = GradesConst.EngCharTable_zvon_pairs;
+
+        private static char[] CharTable_udarn_pairs,
+            RusCharTable_udarn_pairs = GradesConst.RusCharTable_udarn_pairs,
+            EngCharTable_udarn_pairs = GradesConst.EngCharTable_udarn_pairs;
 
 
-	// Use this for initialization
-	void Start (string source) {
-		Phrases = LoadRandStrings (source, SourceFiles);  // если несколько файлов, то можно случайно выбирать один из них
+    // Use this for initialization
+        void Start (string source) {
+		RS = GameObject.Find ("SceneControl").GetComponent<RusLesson1>();		
+
+	// проверяем язык
+		if (RS.LessonLanguage == (int)languages.russian) {
+			CharTable = RusCharTable;  // для русской версии
+			CharTableSize = RusCharTable.Length;
+			CharTable_closest = RusCharTable_closest;
+			CharTable_zvon_pairs = RusCharTable_zvon_pairs;
+			CharTable_udarn_pairs = RusCharTable_udarn_pairs;
+			SourceFiles = GradesConst.SourceFilesRus;
+			}
+		else if (RS.LessonLanguage == (int)languages.english) {
+            CharTable = EngCharTable;  // для русской версии
+            CharTableSize = EngCharTable.Length;
+            CharTable_closest = EngCharTable_closest;
+            CharTable_zvon_pairs = EngCharTable_zvon_pairs;
+            CharTable_udarn_pairs = EngCharTable_udarn_pairs;
+            SourceFiles = GradesConst.SourceFilesEng;
+            }
+
+        Phrases = LoadRandStrings (source, SourceFiles);  // если несколько файлов, то можно случайно выбирать один из них
 		SourceLength = Phrases.Length;
 		SourceIndex = 0;
-		CharTable = RusCharTable;  // для русской версии
-		CharTableSize = RusCharTable.Length;
-		CharTable_closest = RusCharTable_closest;
-		CharTable_zvon_pairs = RusCharTable_zvon_pairs;
-		CharTable_udarn_pairs = RusCharTable_udarn_pairs;
 	}
 	
 	public PhraseGenerator (string source) {
-			Start (source);
+		Start (source);
 	}
 
 	private string[] LoadRandStrings (string source, string[] filenames) {
@@ -96,8 +92,8 @@ Debug.Log ("Грузим " + res[0]);
 
 	private string[] LoadStringsFromFile (string filename) {
 		string s = filename.Split ('.')[0];
-		TextAsset t = Resources.Load ("Strings/" + s, typeof (TextAsset)) as TextAsset;
-		string[] s1 = t.text.Split ('\n');
+		TextAsset t = Resources.Load (GradesConst.StringsPath + s, typeof (TextAsset)) as TextAsset;
+		string[] s1 = t.text.Split (GradesConst.EndOfLine);
 
 		return s1;
 	}
@@ -187,7 +183,7 @@ Debug.Log (result);
 	}
 
 	private int WordsCount (string s) {
-		string[] ss = s.Split (' ');
+		string[] ss = s.Split (GradesConst.Spacebar);
 		int words = 0;
 		for (int i = 0; i < ss.Length; i ++) {
 			if (ss[i].Length > GradesConst.MinWordLength) 
@@ -208,7 +204,7 @@ Debug.Log (result);
 		bool flag = true;
 		int d, j = 0;
 		// разбиваем фразу на слова
-		string[] ss = s1.Split (' ');  		
+		string[] ss = s1.Split (GradesConst.Spacebar);  		
 
 		for (int i = 0; i < ss.Length; i++) {
 			ss[i].Trim ();
@@ -253,7 +249,7 @@ Debug.Log ("ProkrustФраза не поместилась!   " + s + "   Все
 	}
 
 	private char MakeError (char[] arr, int k, int rules) {
-		char res = '\0';
+		char res = GradesConst.ZeroChar;
 		RuleSet rule1 = (RuleSet)rules;
 
 		switch (rule1) {	

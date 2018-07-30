@@ -6,11 +6,10 @@ namespace MyMobileProject1 {
 
 public class RulesShow : MonoBehaviour {
 
-	public Text RulesText;
+	public Text RulesText, Title, Close;
 	public Button Back;
 	public StartupManager SM;
 
-	private static string Rules = "В этой игре тебе нужно исправлять грамматические ошибки, зачёркивая пальцем неправильные буквы в словах. \nЧем быстрее ты это делаешь, тем лучше! \n\nЗа выполнение задания, состоящего из нескольких фраз, ты получаешь звёзды. Собирая звёзды, ты повышаешь свой уровень в игре. \n\nС каждым новым уровнем задания становятся всё интереснее! \nПопробуй достичь максимального уровня и заработать звание Волшебника!"; 
 
 	// Use this for initialization
 	void Start () {
@@ -25,7 +24,9 @@ public class RulesShow : MonoBehaviour {
 	}
 
 	void Awake () {
-		RulesText.text = Rules;
+		RulesText.text = GradesConst.RulesText[SM.Language];
+		Close.text = GradesConst.Close[SM.Language];
+		Title.text = GradesConst.Rules[SM.Language];
 	}
 
 

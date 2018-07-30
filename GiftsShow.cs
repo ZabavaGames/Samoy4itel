@@ -2,37 +2,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Runtime.InteropServices;
 
 namespace MyMobileProject1 {
 
 public class GiftsShow : MonoBehaviour {
 
 	public StartupManager SM;
-
 	public Button BuyADButton, BuyLvButton;
-	public Text BuyADText, BuyLvText;
+	public Text Title, BuyADText, BuyADPrice, BuyLvText, BuyLvPrice, Close;
 
-	private static string ADPurchased = "Ты уже купил пакет \"Премиум\". Спасибо за твою поддержку!";
-	private static string ADnotPurchased = "Купить пакет \"Премиум\" для того, чтобы отключить рекламу в игре и получать все будущие обновления бесплатно!";
-	private static string AllLvPurchased = "Ты не можешь купить максимальный уровень в игре! Но ты можешь достичь его сам!";
-	private static string LvnotPurchased = "Ты можешь мгновенно повысить свой уровень. Ты автоматически получишь необходимое для этого количество звёзд.";
 	private bool state;
 
 	// Use this for initialization
 	void Start () {
+		Title.text = GradesConst.Basket[SM.Language];
+		BuyADPrice.text = GradesConst.PremiumPrice[SM.Language];
+		BuyLvPrice.text = GradesConst.LvUnlockPrice[SM.Language];
+		Close.text = GradesConst.Close[SM.Language];
+
 		state = SM.InAppItems.DisableAds;
 		if (state) {
 			BuyADButton.gameObject.SetActive (false);
-			BuyADText.text = ADPurchased;
+			BuyADText.text = GradesConst.ADPurchased[SM.Language];
 			}
 		else {
 			BuyADButton.gameObject.SetActive (true);
-			BuyADText.text = ADnotPurchased;
+			BuyADText.text = GradesConst.ADnotPurchased[SM.Language];
 			}
 		if (SM.Grade >= GradesConst.MaxGrade - 1)
-			BuyLvText.text = AllLvPurchased;
+			BuyLvText.text = GradesConst.AllLvPurchased[SM.Language];
 		else 
-			BuyLvText.text = LvnotPurchased;
+			BuyLvText.text = GradesConst.LvnotPurchased[SM.Language];
 	}
 	
 	// Update is called once per frame
@@ -45,12 +46,12 @@ public class GiftsShow : MonoBehaviour {
 			if (SM.InAppItems.DisableAds) {
 Debug.Log ("фигачим!");
 				BuyADButton.gameObject.SetActive (false);
-				BuyADText.text = ADPurchased;
+				BuyADText.text = GradesConst.ADPurchased[SM.Language];
 				}
 			else {
 Debug.Log ("не фигачим!");
 				BuyADButton.gameObject.SetActive (true);
-				BuyADText.text = ADnotPurchased;
+				BuyADText.text = GradesConst.ADnotPurchased[SM.Language];
 				}
 			state = SM.InAppItems.DisableAds;
 		}

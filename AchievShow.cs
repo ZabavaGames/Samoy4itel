@@ -7,16 +7,9 @@ namespace MyMobileProject1 {
 
 public class AchievShow : MonoBehaviour {
 
-	public Text LevelString, Stars, StarsLeft, StarsCount, NextLevelString, ViewAdsText, AdsInfoText;
+	public Text Title, LevelString, Stars, StarsLeft, StarsCount, NextLevelString, ViewAdsText, AdsInfoText, Close;
 	public StartupManager SM;
 	public Button ViewAds;
-
-	private static string Level = "Твой уровень: ";
-	private static string NextLevel = "Следующий уровень: ";
-	private static string Star_S = "Собрано звезд: ";
-	private static string Stars_L = "Осталось собрать звезд: ";
-	private static string AdsInfo = "Ты можешь посмотреть рекламный ролик, чтобы получить звезду!";
-	private static string AdsText = "Смотреть видео";
 
 	// Use this for initialization
 	void Start () {
@@ -29,13 +22,15 @@ public class AchievShow : MonoBehaviour {
 	}
 
 	void Awake () {
-		LevelString.text = Level + SM.GetGradeString ();
-		Stars.text = Star_S;
+		Title.text = GradesConst.Trophy[SM.Language];
+		LevelString.text = GradesConst.LevelString[SM.Language] + SM.GetGradeString ();
+		Stars.text = GradesConst.Star_S[SM.Language];
 		StarsCount.text = SM.TotalStars.ToString ();
-		NextLevelString.text = NextLevel + SM.GetNextGradeString ();
-		StarsLeft.text = Stars_L + (SM.GetNextLevelStars());
-		ViewAdsText.text = AdsText;
-		AdsInfoText.text = AdsInfo;
+		NextLevelString.text = GradesConst.NextLevel[SM.Language] + SM.GetNextGradeString ();
+		StarsLeft.text = GradesConst.Stars_L[SM.Language] + (SM.GetNextLevelStars());
+		ViewAdsText.text = GradesConst.AdsText[SM.Language];
+		AdsInfoText.text = GradesConst.AdsInfo[SM.Language];
+		Close.text = GradesConst.Close[SM.Language];
 	}
 
 }

@@ -13,10 +13,10 @@ namespace MyMobileProject1 {
 
 	public class StartupManager : MonoBehaviour {
 
-	public bool FirstRun, SayHello, SetScore;
-	public int TotalStars;
-	public int Grade;
+	public bool FirstRun, SayHello, SetScore, ShowPromo;
+	public int TotalStars, Grade, Language, LessonLanguage;
 	public bool EscapeSupported;
+	public Text ScoreText, OptionYes, OptionNo, OptionLater;
 
 	public struct Purchase {
 		public bool DisableAds;
@@ -25,13 +25,10 @@ namespace MyMobileProject1 {
 
 	public GiftsShow SaleWindow;
 	public MainLevelShow MenuWindow;
-	public GameObject Otzenka;
+	public GameObject Otzenka, LangWindow;
 
 	private Action StartScene;
 
-	private const string PlayMarketUrl = "https://play.google.com/store/apps/details?id=com.ZabavaGames.Samoy4itel";
-	private const string PlayMarketLink = "market://details?id=com.ZabavaGames.Samoy4itel";
-//	private const string PlayMarketLink = "market://details?id=" + Application.productName;
 
 	// Use this for initialization
 	void Start () {	
@@ -39,6 +36,7 @@ namespace MyMobileProject1 {
    		Grade = GradesConst.MinGrade;
 		InAppItems.DisableAds = false; 
 
+		// задействуем кнопку назад или клавишу escape
 		if (Application.platform == RuntimePlatform.Android || 
 			Application.platform == RuntimePlatform.WindowsPlayer ||
 			Application.platform == RuntimePlatform.WindowsEditor)
@@ -57,9 +55,31 @@ namespace MyMobileProject1 {
 				FirstRun = false;	
 	    // выставить свой уровень и достижения
 			LoadPrefs ();
-		//  проверяем, отключена ли у нас реклама
-			CheckAds ();
-			}	
+			}
+
+            // выбираем тип урока - русский или английский; тоже самое в руслессон
+            if (Application.identifier == GradesConst.ApplicationIdRus)
+                LessonLanguage = (int)languages.russian;
+            else if (Application.identifier == GradesConst.ApplicationIdEng)
+                LessonLanguage = (int)languages.english;
+            else
+                ExitGame(false);
+
+            // выставляем язык интерфейса
+            if (!PlayerPrefs.HasKey (GradesConst.lang)) {
+            Debug.Log ("System language is: " + Application.systemLanguage);
+			if (Application.systemLanguage == SystemLanguage.Russian)
+				Language = (int)languages.russian;
+			else if (Application.systemLanguage == SystemLanguage.English)
+				Language = (int)languages.english;
+			else ChooseLanguageDialog (true);
+			PlayerPrefs.SetString (GradesConst.lang, GradesConst.langs [Language]);
+			}
+		else {
+			string s = PlayerPrefs.GetString (GradesConst.lang);
+			int i = Array.IndexOf (GradesConst.langs, s);
+			Language = (int)languages.russian + i;
+			}
 
 		// проверяем, заходил ли сегодня юзер, чтобы поздороваться
 		string Today = DateTime.Now.ToShortDateString ();
@@ -75,13 +95,18 @@ namespace MyMobileProject1 {
 			SetScore = true;
 		else
 			SetScore = false;
-	}
 
-	private void ResetPrefs () {
-		PlayerPrefs.SetString (GradesConst.firstrun, GradesConst.started);
+        //  проверяем, отключена ли у нас реклама
+        CheckAds();
+        }
+
+        private void ResetPrefs () {
+            Debug.Log("эта фигня работает?");
+        PlayerPrefs.SetString (GradesConst.firstrun, GradesConst.started);
 		PlayerPrefs.SetInt (GradesConst.stars, 0);
 		PlayerPrefs.SetInt (GradesConst.grade, GradesConst.MinGrade);
 		PlayerPrefs.SetString (GradesConst.ads, GradesConst.enabled); // сбросить
+		PlayerPrefs.DeleteKey (GradesConst.lang);
 		ClearAllSaves ();		
 	}
 
@@ -108,9 +133,10 @@ namespace MyMobileProject1 {
 				state = true;
 			}
 		InAppItems.DisableAds = state;  // возвращаем тру, если реклама отключена
-	//	SetADText_and_Button (state);
-		
-		ShowDebugInfo ();
+
+        if (!InAppItems.DisableAds && !FirstRun && Grade > GradesConst.MinGrade && SayHello)
+                ShowPromo = true;
+   //     ShowDebugInfo ();
 	}
 
 	// при покупке (отмене) задействуем эту ф-ию, прописываем флаг и проверяем активность кнопки покупки дизейбла
@@ -119,10 +145,10 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 		InAppItems.DisableAds = state;
 	//	SetADText_and_Button (state);
 		PlayerPrefs.SetString (GradesConst.ads, (state) ? GradesConst.disabled : GradesConst.enabled);
-		SceneManager.LoadScene (GradesConst.Scene0);
+		Reload ();
 	}
 
-	// при покупке разблокировки уоровня
+	// при покупке разблокировки уровня
 	public void LvUnlock (bool state) {
 		LoadPrefs ();
 	//	int i = 0, newgrade = Grade;
@@ -134,11 +160,11 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 		Grade ++;
 
 		SavePrefs ();
-		SceneManager.LoadScene (GradesConst.Scene0);
+		Reload ();
 	}
 
-	private void SetADText_and_Button (bool state) {
-/*		bool btn, txt;
+/*	private void SetADText_and_Button (bool state) {
+		bool btn, txt;
 		Text t = null;
 		if (BuyADButton == null && (BuyADButton = GameObject.Find ("BuyADButton")) == null) 
 			btn = false;
@@ -163,14 +189,16 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 			}
 		else if (!btn)
 			if (txt) t.text = ADPurchased;
-*/
+
 		if (SaleWindow != null) 
 			SaleWindow.Awake ();
 		if (MenuWindow != null)
 			MenuWindow.Awake ();
+	} */
 
+	public void Reload () {
+		SceneManager.LoadScene (GradesConst.Scene0);
 	}
-
 
 	// Update is called once per frame
 	void Update () {
@@ -186,30 +214,41 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 
 
 	public void StartRusLesson (int flag) {
-		StartLesson (flag);
+            string name = string.Empty;
+            if (LessonLanguage == (int)languages.russian)
+                name = GradesConst.Scene1;
+            else if (LessonLanguage == (int)languages.english)
+                name = GradesConst.Scene2;
+            StartLesson (flag, name);
 	}
 
-	private void StartLesson (int flag) {
-	//	string name = (flag == 1) ? GradesConst.Scene1: GradesConst.Scene2;
-		string name = GradesConst.Scene1;
-	//	PlayerPrefs.SetInt (GradesConst.scene, flag);
-		if (FirstRun || Grade == GradesConst.MinGrade) 
-			flag = 0;
-		PlayerPrefs.SetInt (GradesConst.rank, flag);
+        public void StartEngLesson(int flag)
+        {
+            string name = string.Empty;
+            if (LessonLanguage == (int)languages.russian)
+                name = GradesConst.Scene1;
+            else if (LessonLanguage == (int)languages.english)
+                name = GradesConst.Scene2;
+            StartLesson(flag, name);
+        }
+
+        private void StartLesson (int flag, string name) {
+	    //	PlayerPrefs.SetInt (GradesConst.scene, flag);
+		    if (FirstRun || Grade == GradesConst.MinGrade) 
+			    flag = 0;
+		    PlayerPrefs.SetInt (GradesConst.rank, flag);
 	
-		StartScene = () => SceneManager.LoadScene (name);
-	// показать рекламу, если не отключена (при первом зап. не показывать
-//		if (!InAppItems.DisableAds && !FirstRun && Grade > GradesConst.MinGrade)
-//			ShowSkippableVideo ();
-//////////////////////////////
-//  РЕКЛАМУ ВРЕМЕННО УБРАЛ!!!!
-//////////////////////////////
-//		else
-			StartScene ();
+		    StartScene = () => SceneManager.LoadScene (name);
+ 
+            // показать рекламу, если не отключена (при первом зап. не показывать)
+            if (ShowPromo)
+    			ShowSkippableVideo ();
+	    	else
+		    	StartScene ();
 	}
 
 	public void ShowVideoButton () {
-		StartScene = () => SceneManager.LoadScene (GradesConst.Scene0);
+		StartScene = () => Reload ();
 		ShowRewardedVideo ();
 	}
 
@@ -275,15 +314,17 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 // ResetPrefs ();  // в тестовых целях!!!
 //////////////////////////////////
 		SavePrefs ();
+        // предложить поставить оценку
 		if (!FirstRun && SetScore && Grade > GradesConst.MinGrade + 1) {
 			ShowScoreWindow (true);
 			}
 		else {
-			ApplicationManager Ap = GameObject.Find ("ApplicationManager").GetComponent<ApplicationManager>();
-			if (withPromo)
-				ShowPromoScreen_OnExit ();
-			Ap.Quit ();
-		//	Application.Quit ();
+            // показать рекламу на выходе
+            if (withPromo && ShowPromo)
+                    ShowPromoScreen_OnExit();
+            ApplicationManager Ap = GameObject.Find ("ApplicationManager").GetComponent<ApplicationManager>();
+			if (Ap != null) Ap.Quit ();
+		    else	Application.Quit ();
 			}
 	}
 
@@ -294,6 +335,10 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 			MenuWindow.gameObject.SetActive (false);
 			SetScore = false;
 			Otzenka.gameObject.SetActive (true);
+			ScoreText.text = GradesConst.ScoreText[Language];
+			OptionYes.text = GradesConst.OptionYes[Language];
+			OptionNo.text = GradesConst.OptionNo[Language];
+			OptionLater.text = GradesConst.OptionLater[Language];
 			}
 		else {
 			Otzenka.gameObject.SetActive (false);
@@ -304,8 +349,8 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 	// перейти в плеймаркет, чтобы поставить оценку
 	public void GoToMarket () {
 		PlayerPrefs.SetString (GradesConst.score, GradesConst.fivestars);
-	//	Application.OpenURL (PlayMarketUrl);
-		Application.OpenURL (PlayMarketLink);
+            // Application.OpenURL (GradesConst.PlayMarketUrl[LessonLanguage]);
+            Application.OpenURL (GradesConst.PlayMarketLink[LessonLanguage]);
 		ExitGame (false);
 	}
 
@@ -323,9 +368,9 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 
 	public void SendEmail ()
  	{
-  	string email = "zabava.games.studio@gmail.com";
-  	string subject = WWW.EscapeURL("About application Sam_sebe_uchitel").Replace("+","%20");
-  	Application.OpenURL("mailto:" + email + "?subject=" + subject);
+  		string email = GradesConst.MailTo;
+  		string subject = WWW.EscapeURL(GradesConst.MailSubject[Language]).Replace("+","%20");
+  		Application.OpenURL("mailto:" + email + "?subject=" + subject);
  	}
  
 
@@ -336,6 +381,7 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 //		string s = Application.buildGUID;
 		string ss = Application.productName;
 		string vcode = Application.version;
+ // это было для теста
 //		t.text = "\n" + "\nVersion: " + vcode + ".026" + "\nFirstRun: " + FirstRun;
 //			+ "\nstars = " + TotalStars + "\ngrade = " + Grade + "\nads disabled = " + InAppItems.DisableAds;
 	}
@@ -350,12 +396,12 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 */	}
 
 	public string GetGradeString () {
-		return GradesConst.GradeStringsRus[Grade];
+		return GradesConst.GradeStrings[Language][Grade];
 	}
 
 	public string GetNextGradeString () {
 		if (Grade <= GradesConst.MaxGrade)
-			return GradesConst.GradeStringsRus[Grade+1];
+			return GradesConst.GradeStrings[Language][Grade+1];
 		else 
 			return String.Empty;
 	}
@@ -364,6 +410,24 @@ Debug.Log ("Работает ф-ия DisableAds. Значения state = " + st
 		if (Grade < GradesConst.MaxGrade)
 			return GradesConst.StarsToPromote[Grade+1] - TotalStars;
 		else return 0;
+	}
+
+	public void SetLanguage (int lang) {
+		Language = lang;
+		PlayerPrefs.SetString (GradesConst.lang, GradesConst.langs [Language]);
+		ChooseLanguageDialog (false);
+		Reload ();
+	}
+
+	public void ChooseLanguageDialog (bool state) {
+		if (state) {
+			MenuWindow.gameObject.SetActive (false);
+			LangWindow.gameObject.SetActive (true);
+			}
+		else {
+			LangWindow.gameObject.SetActive (false);
+			MenuWindow.gameObject.SetActive (true);
+			}
 	}
 
 
